@@ -5,6 +5,7 @@ import Header from "../component/header";
 import AddUserForm from "../component/AddUserForm";
 import UploadMediaForm from "../component/UploadMediaForm";
 import AddNewsForm from "../component/AddNewsForm";
+import Dialog from "../component/Dialog";
 
 const initialUsers = [
 	{ id: 1, name: "Alice Johnson", email: "alice@example.com", role: "Admin" },
@@ -99,14 +100,10 @@ export default function AdminPage() {
 							<div className="flex items-center justify-between mb-4">
 								<h2 className="text-lg font-medium text-gray-800">Users</h2>
 								<div className="flex items-center gap-2">
-									<button onClick={() => setShowAddForm(!showAddForm)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Add User</button>
-									<button className="px-3 py-2 border rounded hover:bg-gray-50">Export</button>
-								</div>
+								<button onClick={() => setShowAddForm(true)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Add User</button>
+								<button className="px-3 py-2 border rounded hover:bg-gray-50">Export</button>
 							</div>
-
-							{showAddForm && (
-								<AddUserForm onAdd={handleAddUser} onCancel={() => setShowAddForm(false)} />
-							)}
+						</div>
 
 							<div className="overflow-x-auto">
 								<table className="min-w-full text-sm text-left">
@@ -143,14 +140,10 @@ export default function AdminPage() {
 							<div className="flex items-center justify-between mb-4">
 								<h2 className="text-lg font-medium text-gray-800">Media Library</h2>
 								<div className="flex items-center gap-2">
-									<button onClick={() => setShowUploadForm(!showUploadForm)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Upload</button>
-									<button className="px-3 py-2 border rounded hover:bg-gray-50">Manage</button>
-								</div>
+								<button onClick={() => setShowUploadForm(true)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Upload</button>
+								<button className="px-3 py-2 border rounded hover:bg-gray-50">Manage</button>
 							</div>
-
-							{showUploadForm && (
-								<UploadMediaForm onUpload={handleUploadMedia} onCancel={() => setShowUploadForm(false)} />
-							)}
+						</div>
 
 							<ul className="divide-y">
 								{media.map((m) => (
@@ -174,13 +167,9 @@ export default function AdminPage() {
 							<div className="flex items-center justify-between mb-4">
 								<h2 className="text-lg font-medium text-gray-800">News</h2>
 								<div className="flex items-center gap-2">
-									<button onClick={() => setShowNewsForm(!showNewsForm)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Create</button>
+									<button onClick={() => setShowNewsForm(true)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Create</button>
 								</div>
 							</div>
-
-							{showNewsForm && (
-								<AddNewsForm onAdd={handleAddNews} onCancel={() => setShowNewsForm(false)} />
-							)}
 
 							<ul className="divide-y">
 								{newsItems.map((n) => (
@@ -203,6 +192,21 @@ export default function AdminPage() {
 					)}
 				</section>
 			</main>
+
+			{/* Add User Dialog */}
+			<Dialog isOpen={showAddForm} onClose={() => setShowAddForm(false)} title="Add New User">
+				<AddUserForm onAdd={handleAddUser} onCancel={() => setShowAddForm(false)} />
+			</Dialog>
+
+			{/* Upload Media Dialog */}
+			<Dialog isOpen={showUploadForm} onClose={() => setShowUploadForm(false)} title="Upload Media">
+				<UploadMediaForm onUpload={handleUploadMedia} onCancel={() => setShowUploadForm(false)} />
+			</Dialog>
+
+			{/* Create News Dialog */}
+			<Dialog isOpen={showNewsForm} onClose={() => setShowNewsForm(false)} title="Create News Article">
+				<AddNewsForm onAdd={handleAddNews} onCancel={() => setShowNewsForm(false)} />
+			</Dialog>
 		</div>
 	);
 }

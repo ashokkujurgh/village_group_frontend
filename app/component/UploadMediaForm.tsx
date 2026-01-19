@@ -70,9 +70,7 @@ export default function UploadMediaForm({ onUpload, onCancel }: UploadMediaFormP
 	};
 
 	return (
-		<div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-			<h3 className="text-md font-semibold text-gray-800 mb-4">Upload Media</h3>
-			<form onSubmit={handleSubmit} className="space-y-4">
+		<form onSubmit={handleSubmit} className="space-y-4">
 				<div>
 					<label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
 					<input
@@ -161,6 +159,5 @@ export default function UploadMediaForm({ onUpload, onCancel }: UploadMediaFormP
 					</button>
 				</div>
 			</form>
-		</div>
-	);
+		);
 }

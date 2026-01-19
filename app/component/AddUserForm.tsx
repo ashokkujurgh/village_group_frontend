@@ -48,9 +48,7 @@ export default function AddUserForm({ onAdd, onCancel }: AddUserFormProps) {
 	};
 
 	return (
-		<div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-			<h3 className="text-md font-semibold text-gray-800 mb-4">Add New User</h3>
-			<form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+		<form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div>
 					<label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
 					<input
@@ -104,7 +102,6 @@ export default function AddUserForm({ onAdd, onCancel }: AddUserFormProps) {
 						Cancel
 					</button>
 				</div>
-			</form>
-		</div>
+		</form>
 	);
 }

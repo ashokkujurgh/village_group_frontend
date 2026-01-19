@@ -1,0 +1,9 @@
+2026-01-19 18:07:54 +05:30: (node:80051) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+2026-01-19 18:07:54 +05:30: (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-01-19 18:07:54 +05:30: ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+2026-01-19 18:07:54 +05:30:  We detected multiple lockfiles and selected the directory of /Users/ashok/package-lock.json as the root directory.
+2026-01-19 18:07:54 +05:30:  To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+2026-01-19 18:07:54 +05:30:    See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+2026-01-19 18:07:54 +05:30:  Detected additional lockfiles: 
+2026-01-19 18:07:54 +05:30:    * /Users/ashok/Desktop/my projects/vgroupapp/package-lock.json
+2026-01-19 18:07:54 +05:30: 
