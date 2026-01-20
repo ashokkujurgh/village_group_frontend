@@ -60,8 +60,13 @@ export default function NewsList({ newsItems, loading, error, onCreateNews, onEd
 							<div className="flex items-start justify-between">
 								<div>
 									<div className="font-medium text-black">Title: {n.title}</div>
-									<div className="text-sm text-gray-700">{n.summary || n.description}</div>
-									<div className="text-xs text-gray-600 mt-1">Created Date: {n.date}</div>
+									<div className="text-sm text-gray-700">{ n.description}</div>
+									<div className="text-xs text-gray-600 mt-1">Created Date:  {new Date(n.created_date).toLocaleDateString('en-US', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                     
+                      })}</div>
 								</div>
 								<div className="flex gap-2">
 								<button 
