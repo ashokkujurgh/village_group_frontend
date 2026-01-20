@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   // Check if the route is admin
   if (pathname.startsWith("/admin")) {
     // Get auth token from cookies
-    const token = request.cookies.get("authToken")?.value;
+    const token = localStorage.getItem("authToken");
 
     // If no token, redirect to login
     if (!token) {

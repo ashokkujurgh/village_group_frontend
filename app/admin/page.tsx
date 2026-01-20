@@ -19,10 +19,6 @@ const initialMedia = [
 	{ id: 3, title: "Flyer PDF", type: "document", uploaded: "2026-01-15" },
 ];
 
-const news = [
-	{ id: 1, title: "New Feature Launched", summary: "We rolled out the new editor.", date: "2026-01-05" },
-	{ id: 2, title: "Maintenance Notice", summary: "Scheduled maintenance on Jan 20.", date: "2026-01-12" },
-];
 
 export default function AdminPage() {
 	const { users, loading,fetchUsers, error } = useFetchUsers();
@@ -35,8 +31,7 @@ export default function AdminPage() {
 	const [showNewsForm, setShowNewsForm] = useState(false);
 	const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
 	const [editingNewsData, setEditingNewsData] = useState<any>(null);
-	const [formData, setFormData] = useState({ name: "", email: "", password: "", mobile: "" });
-	const [formError, setFormError] = useState("");
+
 	const tabs = ["Users", "Media", "News"];
 
 	const handleAddUser = (newUserData: { name: string; email: string; password: string; mobile: string }) => {
