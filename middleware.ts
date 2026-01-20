@@ -6,8 +6,9 @@ export function middleware(request: NextRequest) {
   // Check if the route is admin
   if (pathname.startsWith("/admin")) {
     // Get auth token from cookies
-    const token = localStorage.getItem("authToken");
-
+   
+    const token = request.cookies.get("authToken")?.value;
+ console.log(token)
     // If no token, redirect to login
     if (!token) {
       const loginUrl = new URL("/login", request.url);
@@ -16,9 +17,9 @@ export function middleware(request: NextRequest) {
     }
 
     // Optional: Validate token (simple check for demo)
-    if (token !== "demo-admin-token") {
+   /* if (token !== "demo-admin-token") {
       return NextResponse.redirect(new URL("/login", request.url));
-    }
+    }*/
   }
 
   return NextResponse.next();

@@ -42,6 +42,7 @@ export const useLogin = () => {
       // Save token to localStorage
       if (data.token) {
         localStorage.setItem("authToken", data.token);
+        document.cookie = `authToken=${data.token}; path=/`;
       }
 
       setLoading(false);
