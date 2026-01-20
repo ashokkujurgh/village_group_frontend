@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "../component/header";
 import AddUserForm from "../component/AddUserForm";
 import UploadMediaForm from "../component/UploadMediaForm";
 import AddNewsForm from "../component/AddNewsForm";
 import Dialog from "../component/Dialog";
+import UserList from "../component/UserList";
+import NewsList from "../component/NewsList";
+import { useFetchUsers } from "../hooks/useFetchUsers";
+import { useFetchNews } from "../hooks/useFetchNews";
 
-const initialUsers = [
-	{ id: 1, name: "Alice Johnson", email: "alice@example.com", role: "Admin" },
-	{ id: 2, name: "Bob Smith", email: "bob@example.com", role: "Editor" },
-	{ id: 3, name: "Carmen Diaz", email: "carmen@example.com", role: "Viewer" },
-];
+
 
 const initialMedia = [
 	{ id: 1, title: "Event Photo 1", type: "image", uploaded: "2026-01-10" },
@@ -25,28 +25,59 @@ const news = [
 ];
 
 export default function AdminPage() {
-	const [users, setUsers] = useState(initialUsers);
+	const { users, loading,fetchUsers, error } = useFetchUsers();
+	const { news: newsData, loading: newsLoading, fetchNews, error: newsError } = useFetchNews();
 	const [media, setMedia] = useState(initialMedia);
-	const [newsItems, setNewsItems] = useState(news);
+	const [newsItems, setNewsItems] = useState<any[]>([]);
 	const [active, setActive] = useState("Users");
 	const [showAddForm, setShowAddForm] = useState(false);
 	const [showUploadForm, setShowUploadForm] = useState(false);
 	const [showNewsForm, setShowNewsForm] = useState(false);
+	const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
+	const [editingNewsData, setEditingNewsData] = useState<any>(null);
 	const [formData, setFormData] = useState({ name: "", email: "", password: "", mobile: "" });
 	const [formError, setFormError] = useState("");
 	const tabs = ["Users", "Media", "News"];
 
 	const handleAddUser = (newUserData: { name: string; email: string; password: string; mobile: string }) => {
-		const newUser = {
-			id: users.length + 1,
-			name: newUserData.name,
-			email: newUserData.email,
-			role: "Viewer",
-		};
-		setUsers([...users, newUser]);
+		fetchUsers();
 		setShowAddForm(false);
 	};
+    const onDeleteUserSuccess = () => {
+		fetchUsers();
+	};
 
+	const handleEditNews = (newsId: string, newsData: any) => {
+		setEditingNewsId(newsId);
+		setEditingNewsData({
+			title: newsData.title,
+			summary: newsData.summary || newsData.description,
+		});
+		setShowNewsForm(true);
+	};
+
+	const handleDeleteNews = async (newsId: string) => {
+		// TODO: Implement delete news API call
+		// For now, just refresh the news list
+		fetchNews();
+	};
+
+	const handleNewsFormSuccess = () => {
+		fetchNews();
+		setShowNewsForm(false);
+		setEditingNewsId(null);
+		setEditingNewsData(null);
+	};
+	useEffect(() => {
+		fetchUsers();
+		fetchNews();
+	}, []);
+
+	useEffect(() => {
+		if (newsData && newsData.length > 0) {
+			setNewsItems(newsData);
+		}
+	}, [newsData]);
 	const handleUploadMedia = (mediaData: { title: string; type: "image" | "video"; file: File }) => {
 		const newMedia = {
 			id: media.length + 1,
@@ -96,43 +127,13 @@ export default function AdminPage() {
 
 				<section>
 					{active === "Users" && (
-						<div className="bg-white rounded-lg shadow p-4">
-							<div className="flex items-center justify-between mb-4">
-								<h2 className="text-lg font-medium text-gray-800">Users</h2>
-								<div className="flex items-center gap-2">
-								<button onClick={() => setShowAddForm(true)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Add User</button>
-								<button className="px-3 py-2 border rounded hover:bg-gray-50">Export</button>
-							</div>
-						</div>
-
-							<div className="overflow-x-auto">
-								<table className="min-w-full text-sm text-left">
-									<thead className="text-gray-600 bg-gray-50">
-										<tr>
-											<th className="p-3">Name</th>
-											<th className="p-3">Email</th>
-											<th className="p-3">Role</th>
-											<th className="p-3">Actions</th>
-										</tr>
-									</thead>
-									<tbody className="divide-y">
-										{users.map((u) => (
-											<tr key={u.id} className="bg-white">
-												<td className="p-3">{u.name}</td>
-												<td className="p-3 text-gray-600">{u.email}</td>
-												<td className="p-3">{u.role}</td>
-												<td className="p-3">
-													<div className="flex gap-2">
-														<button className="text-indigo-600 hover:underline">Edit</button>
-														<button className="text-red-600 hover:underline">Delete</button>
-													</div>
-												</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-						</div>
+						<UserList 
+							users={users}
+							loading={loading}
+							error={error}
+							onDeleteSuccess={onDeleteUserSuccess}
+							onAddUser={() => setShowAddForm(true)}
+						/>
 					)}
 
 					{active === "Media" && (
@@ -163,32 +164,18 @@ export default function AdminPage() {
 					)}
 
 					{active === "News" && (
-						<div className="bg-white rounded-lg shadow p-4">
-							<div className="flex items-center justify-between mb-4">
-								<h2 className="text-lg font-medium text-gray-800">News</h2>
-								<div className="flex items-center gap-2">
-									<button onClick={() => setShowNewsForm(true)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Create</button>
-								</div>
-							</div>
-
-							<ul className="divide-y">
-								{newsItems.map((n) => (
-									<li key={n.id} className="p-3">
-										<div className="flex items-start justify-between">
-											<div>
-												<div className="font-medium">{n.title}</div>
-												<div className="text-sm text-gray-600">{n.summary}</div>
-												<div className="text-xs text-gray-400 mt-1">{n.date}</div>
-											</div>
-											<div className="flex gap-2">
-												<button className="text-indigo-600 hover:underline">Edit</button>
-												<button className="text-red-600 hover:underline">Delete</button>
-											</div>
-										</div>
-									</li>
-								))}
-							</ul>
-						</div>
+						<NewsList 
+							newsItems={newsItems}
+							loading={newsLoading}
+							error={newsError}
+							onCreateNews={() => {
+								setEditingNewsId(null);
+								setEditingNewsData(null);
+								setShowNewsForm(true);
+							}}
+							onEditNews={handleEditNews}
+							onDeleteNews={handleDeleteNews}
+						/>
 					)}
 				</section>
 			</main>
@@ -203,9 +190,19 @@ export default function AdminPage() {
 				<UploadMediaForm onUpload={handleUploadMedia} onCancel={() => setShowUploadForm(false)} />
 			</Dialog>
 
-			{/* Create News Dialog */}
-			<Dialog isOpen={showNewsForm} onClose={() => setShowNewsForm(false)} title="Create News Article">
-				<AddNewsForm onAdd={handleAddNews} onCancel={() => setShowNewsForm(false)} />
+			{/* Create/Edit News Dialog */}
+			<Dialog isOpen={showNewsForm} onClose={() => setShowNewsForm(false)} title={editingNewsId ? "Edit News Article" : "Create News Article"}>
+				<AddNewsForm 
+					newsId={editingNewsId || undefined}
+					initialData={editingNewsData || undefined}
+					onAdd={handleAddNews} 
+					onCancel={() => {
+						setShowNewsForm(false);
+						setEditingNewsId(null);
+						setEditingNewsData(null);
+					}} 
+					onSuccess={handleNewsFormSuccess}
+				/>
 			</Dialog>
 		</div>
 	);
