@@ -1,11 +1,13 @@
 'use client';
 
 import Header from "../component/header";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useFetchNews } from "../hooks/useFetchNews";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('media');
-  
+  const { news, loading, error } = useFetchNews();
+
   // Sample media data
   const mediaItems = [
     { id: 1, type: 'image', title: 'Community Event', thumbnail: 'https://via.placeholder.com/300x200?text=Event+Photo' },
@@ -14,14 +16,6 @@ export default function Home() {
     { id: 4, type: 'video', title: 'Cultural Performance', thumbnail: 'https://via.placeholder.com/300x200?text=Performance+Video' },
     { id: 5, type: 'image', title: 'Market Day', thumbnail: 'https://via.placeholder.com/300x200?text=Market' },
     { id: 6, type: 'video', title: 'Local News', thumbnail: 'https://via.placeholder.com/300x200?text=Local+News' },
-  ];
-
-  // Sample news data
-  const newsItems = [
-    { id: 1, title: 'New Community Center Opened', summary: 'The newly built community center is now open for all residents.', date: '2026-01-15' },
-    { id: 2, title: 'Annual Festival Scheduled', summary: 'Join us for the annual village festival happening next month.', date: '2026-01-12' },
-    { id: 3, title: 'New Roads Being Built', summary: 'Infrastructure development project starts this spring.', date: '2026-01-10' },
-    { id: 4, title: 'Water Supply Project', summary: 'New water supply system installation begins next week.', date: '2026-01-08' },
   ];
 
   return (
@@ -35,24 +29,21 @@ export default function Home() {
         {/* Mobile Tabs - Hidden on lg screens */}
         <div className="lg:hidden mb-6">
           <div className="flex border-b border-gray-300">
-           
             <button
               onClick={() => setActiveTab('media')}
-              className={`px-4 py-2 font-semibold transition-colors ${
-                activeTab === 'media'
+              className={`px-4 py-2 font-semibold transition-colors ${activeTab === 'media'
                   ? 'border-b-2 border-indigo-600 text-indigo-600'
                   : 'text-gray-600 hover:text-gray-800'
-              }`}
+                }`}
             >
               Gallery & Videos
             </button>
-             <button
+            <button
               onClick={() => setActiveTab('news')}
-              className={`px-4 py-2 font-semibold transition-colors ${
-                activeTab === 'news'
+              className={`px-4 py-2 font-semibold transition-colors ${activeTab === 'news'
                   ? 'border-b-2 border-indigo-600 text-indigo-600'
                   : 'text-gray-600 hover:text-gray-800'
-              }`}
+                }`}
             >
               Latest News
             </button>
@@ -63,18 +54,49 @@ export default function Home() {
           {/* Left Section - News (1/4) - Hidden on mobile unless tab is active */}
           <div className={`col-span-1 ${activeTab === 'media' ? 'hidden lg:block' : 'block'}`}>
             <h2 className="text-xl font-bold text-gray-800 mb-4">Latest News</h2>
-            <div className="space-y-3">
-              {newsItems.map((news) => (
-                <div key={news.id} className="bg-white rounded-lg shadow-md p-3 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200">
-                  <div className="text-xs text-gray-500 mb-1">{news.date}</div>
-                  <h3 className="text-sm font-semibold text-gray-800 mb-1">{news.title}</h3>
-                  <p className="text-xs text-gray-600 line-clamp-2">{news.summary}</p>
-                  <a href="#" className="text-indigo-600 text-xs font-semibold hover:text-indigo-700 mt-1 inline-block">
-                    Read More →
-                  </a>
-                </div>
-              ))}
-            </div>
+
+            {loading && (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Loading news...</p>
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600 text-sm">
+                {error}
+              </div>
+            )}
+
+            {!loading && !error && news.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No news articles available.</p>
+              </div>
+            )}
+
+            {!loading && !error && news.length > 0 && (
+              <div className="space-y-3">
+                {news.map((nw) => (
+                  <div key={nw._id} className="bg-white rounded-lg shadow-md p-3 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200">
+
+                    <h3 className="text-sm font-semibold text-gray-800 mb-1">{nw.title}</h3>
+                    <div className="text-xs text-gray-500 mb-1">
+                      {new Date(nw.created_date).toLocaleDateString('en-US', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                     
+                      })}
+                    </div>
+                    <p className="text-xs text-black line-clamp-2">
+                      {nw.description}
+                    </p>
+                    <a href="#" className="text-indigo-600 text-xs font-semibold hover:text-indigo-700 mt-1 inline-block">
+                      Read More →
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right Section - Media (3/4) - Full width on mobile when tab is active */}

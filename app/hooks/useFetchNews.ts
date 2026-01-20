@@ -4,13 +4,12 @@ import { useState, useEffect } from "react";
 import { getApiUrl, API_ENDPOINTS } from "../config/urls";
 
 interface News {
-  id?: string;
-  _id?: string;
+ 
+  _id: string;
   title: string;
   description: string;
-  summary?: string;
-  date?: string;
-  [key: string]: any;
+  created_date: string;
+ 
 }
 
 interface FetchNewsResponse {
@@ -44,8 +43,9 @@ export const useFetchNews = (autoFetch = true) => {
           "Authorization": `Bearer ${token}`,
         },
       });
-
+    setNews([]);
       if (!response.ok) {
+       
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to fetch news");
       }

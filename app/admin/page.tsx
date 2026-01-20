@@ -10,6 +10,8 @@ import UserList from "../component/UserList";
 import NewsList from "../component/NewsList";
 import { useFetchUsers } from "../hooks/useFetchUsers";
 import { useFetchNews } from "../hooks/useFetchNews";
+import { useDeleteNews } from "../hooks/useDeleteNews";
+import { useRouter, useSearchParams } from "next/navigation";
 
 
 
@@ -21,9 +23,11 @@ const initialMedia = [
 
 
 export default function AdminPage() {
-	const { users, loading,fetchUsers, error } = useFetchUsers();
+	const router = useRouter();
+	const { users, loading, fetchUsers, error } = useFetchUsers();
 	const { news: newsData, loading: newsLoading, fetchNews, error: newsError } = useFetchNews();
 	const [media, setMedia] = useState(initialMedia);
+	const searchParams = useSearchParams();
 	const [newsItems, setNewsItems] = useState<any[]>([]);
 	const [active, setActive] = useState("Users");
 	const [showAddForm, setShowAddForm] = useState(false);
@@ -33,14 +37,27 @@ export default function AdminPage() {
 	const [editingNewsData, setEditingNewsData] = useState<any>(null);
 
 	const tabs = ["Users", "Media", "News"];
-
+	useEffect(() => {
+		const tab = searchParams.get("tab") || "Users";
+		if (tabs.includes(tab)) {
+			setActive(tab);
+		}
+	}, [searchParams]);
 	const handleAddUser = (newUserData: { name: string; email: string; password: string; mobile: string }) => {
 		fetchUsers();
 		setShowAddForm(false);
 	};
-    const onDeleteUserSuccess = () => {
+	const onDeleteUserSuccess = () => {
 		fetchUsers();
 	};
+
+	const { deleteNews } = useDeleteNews();
+	// ...existing code...
+	const handleTabChange = (tab: string) => {
+		setActive(tab);
+		router.push(`/admin?tab=${tab}`);
+	};
+
 
 	const handleEditNews = (newsId: string, newsData: any) => {
 		setEditingNewsId(newsId);
@@ -52,9 +69,13 @@ export default function AdminPage() {
 	};
 
 	const handleDeleteNews = async (newsId: string) => {
-		// TODO: Implement delete news API call
-		// For now, just refresh the news list
-		fetchNews();
+
+
+		const success = await deleteNews(newsId);
+		if (success) {
+			// Refresh news list
+			fetchNews();
+		}
 	};
 
 	const handleNewsFormSuccess = () => {
@@ -107,12 +128,11 @@ export default function AdminPage() {
 						{tabs.map((t) => (
 							<button
 								key={t}
-								onClick={() => setActive(t)}
-								className={`px-4 py-2 -mb-px ${
-									active === t
-										? "border-b-2 border-indigo-600 text-indigo-600 font-medium"
-										: "text-gray-600 hover:text-gray-800"
-								}`}
+								onClick={() => handleTabChange(t)}
+								className={`px-4 py-2 -mb-px ${active === t
+									? "border-b-2 border-indigo-600 text-indigo-600 font-medium"
+									: "text-gray-600 hover:text-gray-800"
+									}`}
 							>
 								{t}
 							</button>
@@ -122,7 +142,7 @@ export default function AdminPage() {
 
 				<section>
 					{active === "Users" && (
-						<UserList 
+						<UserList
 							users={users}
 							loading={loading}
 							error={error}
@@ -136,10 +156,10 @@ export default function AdminPage() {
 							<div className="flex items-center justify-between mb-4">
 								<h2 className="text-lg font-medium text-gray-800">Media Library</h2>
 								<div className="flex items-center gap-2">
-								<button onClick={() => setShowUploadForm(true)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Upload</button>
-								<button className="px-3 py-2 border rounded hover:bg-gray-50">Manage</button>
+									<button onClick={() => setShowUploadForm(true)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Upload</button>
+									<button className="px-3 py-2 border rounded hover:bg-gray-50">Manage</button>
+								</div>
 							</div>
-						</div>
 
 							<ul className="divide-y">
 								{media.map((m) => (
@@ -159,7 +179,7 @@ export default function AdminPage() {
 					)}
 
 					{active === "News" && (
-						<NewsList 
+						<NewsList
 							newsItems={newsItems}
 							loading={newsLoading}
 							error={newsError}
@@ -187,15 +207,15 @@ export default function AdminPage() {
 
 			{/* Create/Edit News Dialog */}
 			<Dialog isOpen={showNewsForm} onClose={() => setShowNewsForm(false)} title={editingNewsId ? "Edit News Article" : "Create News Article"}>
-				<AddNewsForm 
+				<AddNewsForm
 					newsId={editingNewsId || undefined}
 					initialData={editingNewsData || undefined}
-					onAdd={handleAddNews} 
+					onAdd={handleAddNews}
 					onCancel={() => {
 						setShowNewsForm(false);
 						setEditingNewsId(null);
 						setEditingNewsData(null);
-					}} 
+					}}
 					onSuccess={handleNewsFormSuccess}
 				/>
 			</Dialog>
