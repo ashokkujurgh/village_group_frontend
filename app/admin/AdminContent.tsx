@@ -112,11 +112,28 @@ export default function AdminContent() {
         setNewsItems([...newsItems, newNews]);
         setShowNewsForm(false);
     };
+     const handleLogout = () => {
+        // Clear token from localStorage
+        localStorage.removeItem("authToken");
+        
+        // Clear token from cookies
+        document.cookie = "authToken=; path=/; max-age=0; SameSite=Lax";
+        
+        // Redirect to login page
+        router.push("/login");
+    };
 
     return (
         <main className="max-w-7xl mx-auto p-6">
-            <h1 className="text-2xl font-semibold text-gray-800 mb-6">Admin Dashboard</h1>
-
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-semibold text-gray-800">Admin Dashboard</h1>
+                <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                >
+                    Logout
+                </button>
+            </div>
             <div className="mb-6">
                 <nav className="flex gap-2 border-b">
                     {tabs.map((t) => (
