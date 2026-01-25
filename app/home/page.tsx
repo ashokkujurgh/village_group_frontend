@@ -159,18 +159,18 @@ console.log("med",displayMediaItems)
                   </div> :
                     <div className="flex-shrink-0 bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
 
-                      <div className="bg-black rounded o">
+                      <div className="bg-black  h-60 w-full">
                         <div
                           dangerouslySetInnerHTML={{ __html: item.video || "" }}
-                          className="   origin-top-left"
+                          className="w-full  flex justify-center items-center"
                           style={{
                             width: "100%",
-                            height: "100%",
+                         
 
                           }}
                         />
                       </div>
-                      <div className="p-3">
+                      <div className="p-3 mt-3">
                                    <div className="text-xs text-gray-600 mt-1">Post Date:  {new Date(item.create_date).toLocaleDateString('en-US', {
                         day: '2-digit',
                         month: 'short',
