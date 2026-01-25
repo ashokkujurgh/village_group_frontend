@@ -17,7 +17,7 @@ export const useMediaOperations = () => {
   };
 
   // POST: Create new media
-  const createMedia = async (mediaData: MediaParams): Promise<Media | null> => {
+  const createMedia = async (mediaData: MediaParams): Promise<any> => {
     setLoading(true);
     setError(null);
 
@@ -40,13 +40,11 @@ export const useMediaOperations = () => {
       }
 
       const data: MediaResponse = await response.json();
-      
-      if (!data.success) {
-        throw new Error(data.message || "Media creation failed");
-      }
+      console.log("Create media response data:", data);
+     
 
       setLoading(false);
-      return data.data || null;
+      return data.message || null;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to create media";
       setError(errorMessage);
@@ -56,7 +54,7 @@ export const useMediaOperations = () => {
   };
 
   // PATCH: Update existing media
-  const updateMedia = async (mediaId: string, mediaData: Partial<MediaParams>): Promise<Media | null> => {
+  const updateMedia = async (mediaId: string, mediaData: Partial<MediaParams>): Promise<any> => {
     setLoading(true);
     setError(null);
 
@@ -85,7 +83,7 @@ export const useMediaOperations = () => {
       }
 
       setLoading(false);
-      return data.data || null;
+     return data.message || null;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to update media";
       setError(errorMessage);

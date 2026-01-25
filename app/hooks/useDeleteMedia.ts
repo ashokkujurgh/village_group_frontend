@@ -37,12 +37,7 @@ export const useDeleteMedia = () => {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to delete media");
       }
-
-      const data: DeleteMediaResponse = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.message || "Failed to delete media");
-      }
+      
 
       setLoading(false);
       return true;

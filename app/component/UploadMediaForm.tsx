@@ -26,6 +26,7 @@ export default function UploadMediaForm({
 	const [file, setFile] = useState<File | null>(null);
 	const [error, setError] = useState("");
 	const [preview, setPreview] = useState<string>(initialData?.image || "");
+	const [videoEmbed, setVideoEmbed] = useState<string>(initialData?.video || "");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const { uploadImage, loading: imageLoading } = useUploadImage();
@@ -41,10 +42,10 @@ export default function UploadMediaForm({
 			return;
 		}
 
-		// Validate file type - only image for now
+		// Validate file type based on media type
 		const isValidImage = selectedFile.type.startsWith("image/");
 
-		if (!isValidImage) {
+		if (mediaType === "image" && !isValidImage) {
 			setError("Please select a valid image file");
 			setFile(null);
 			setPreview("");
@@ -53,12 +54,14 @@ export default function UploadMediaForm({
 
 		setFile(selectedFile);
 
-		// Create preview for images
-		const reader = new FileReader();
-		reader.onloadend = () => {
-			setPreview(reader.result as string);
-		};
-		reader.readAsDataURL(selectedFile);
+		// Create preview for images only
+		if (mediaType === "image" && isValidImage) {
+			const reader = new FileReader();
+			reader.onloadend = () => {
+				setPreview(reader.result as string);
+			};
+			reader.readAsDataURL(selectedFile);
+		}
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -80,8 +83,13 @@ export default function UploadMediaForm({
 			return;
 		}
 
-		if (!isEditing && !file) {
+		if (!isEditing && mediaType === "image" && !file) {
 			setError("Please select an image file");
+			return;
+		}
+
+		if (!isEditing && mediaType === "video" && !videoEmbed.trim()) {
+			setError("Please enter Facebook embed code for video");
 			return;
 		}
 
@@ -91,7 +99,7 @@ export default function UploadMediaForm({
 			let imageUrl: string | null = initialData?.image || "";
 
 			// If a new file is selected, upload it first
-			if (file) {
+			if (file && mediaType === "image") {
 				imageUrl = await uploadImage(file);
 				console.log("Uploaded image URL:", imageUrl);
 				if (!imageUrl) {
@@ -104,7 +112,8 @@ export default function UploadMediaForm({
 				type: mediaType.trim(),
 				desc: desc.trim(),
 				image: imageUrl,
-				video: "",
+				video: mediaType === "video" ? videoEmbed.trim() : "",
+				videoEmbed: mediaType === "video" ? videoEmbed.trim() : "",
 			};
 
 			let result;
@@ -116,12 +125,14 @@ export default function UploadMediaForm({
 				result = await createMedia(mediaData);
 			}
 
+			console.log("Media operation result:", result);
 			if (result) {
 				setTitle("");
 				setMediaType("image");
 				setDesc("");
 				setFile(null);
 				setPreview("");
+				setVideoEmbed("");
 				onSuccess?.(result);
 			}
 		} catch (err) {
@@ -154,14 +165,19 @@ export default function UploadMediaForm({
 				<label className="block text-sm font-medium text-gray-700 mb-1">Media Type</label>
 				<select
 					value={mediaType}
-					onChange={(e) => setMediaType(e.target.value)}
+					onChange={(e) => {
+						setMediaType(e.target.value);
+						setFile(null);
+						setPreview("");
+						setVideoEmbed("");
+						setError("");
+					}}
 					disabled={isSubmitting}
 					className="w-full px-3 py-2 border border-gray-300  text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 disabled:bg-gray-100"
 				>
 					<option value="image">Image</option>
-					<option value="document">Document</option>
-					<option value="audio">Audio</option>
-					<option value="other">Other</option>
+					<option value="video">Video</option>
+					
 				</select>
 			</div>
 
@@ -177,28 +193,61 @@ export default function UploadMediaForm({
 				/>
 			</div>
 
-			<div>
-				<label className="block text-sm font-medium text-gray-700 mb-2">Image</label>
-				<input
-					type="file"
-					onChange={handleFileChange}
-					accept="image/*"
-					disabled={isSubmitting || imageLoading}
-					className="w-full px-3 py-2 border border-gray-300  text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 disabled:bg-gray-100"
-				/>
-				<p className="text-xs text-gray-500 mt-1">Supported formats: JPG, PNG, GIF, WebP</p>
-			</div>
+			{mediaType === "image" ? (
+				<>
+					<div>
+						<label className="block text-sm font-medium text-gray-700 mb-2">Image</label>
+						<input
+							type="file"
+							onChange={handleFileChange}
+							accept="image/*"
+							disabled={isSubmitting || imageLoading}
+							className="w-full px-3 py-2 border border-gray-300  text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 disabled:bg-gray-100"
+						/>
+						<p className="text-xs text-gray-500 mt-1">Supported formats: JPG, PNG, GIF, WebP</p>
+					</div>
 
-			{preview && (
-				<div className="mt-3">
-					<p className="text-sm text-gray-600 mb-2">Preview:</p>
-					<img src={preview} alt="Preview" className="w-full h-40  text-black object-cover rounded-lg border border-gray-300" />
-				</div>
-			)}
+					{preview && (
+						<div className="mt-3">
+							<p className="text-sm text-gray-600 mb-2">Preview:</p>
+							<img src={preview} alt="Preview" className="w-full h-40  text-black object-cover rounded-lg border border-gray-300" />
+						</div>
+					)}
 
-			{file && (
-				<div className="text-sm text-gray-600 bg-blue-50 p-2 rounded">
-					<span className="font-medium">Selected file:</span> {file.name} ({(file.size / 1024).toFixed(2)} KB)
+				</>
+			) : (
+				<div>
+					<label className="block text-sm font-medium text-gray-700 mb-2">Facebook Embed Code</label>
+					<textarea
+						value={videoEmbed}
+						onChange={(e) => setVideoEmbed(e.target.value)}
+						placeholder="Paste your Facebook video embed code here (e.g., <iframe src=... ></iframe>)"
+						disabled={isSubmitting}
+						rows={5}
+						className="w-full px-3 py-2 border border-gray-300 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 disabled:bg-gray-100 font-mono text-xs"
+					/>
+					<p className="text-xs text-gray-500 mt-1">
+						Get embed code from Facebook video by clicking "Share" → "Embed Code"
+					</p>
+
+					{videoEmbed && (
+						<div className="mt-4">
+							<p className="text-sm text-gray-600 mb-3">Preview:</p>
+							<div className="w-full bg-black rounded-lg overflow-hidden" style={{ maxWidth: "100%", aspectRatio: "16/9" }}>
+								<div 
+									dangerouslySetInnerHTML={{ __html: videoEmbed }}
+									className="w-full h-full"
+									style={{
+										width: "100%",
+										height: "100%",
+										display: "flex",
+										alignItems: "center",
+										justifyContent: "center"
+									}}
+								/>
+							</div>
+						</div>
+					)}
 				</div>
 			)}
 

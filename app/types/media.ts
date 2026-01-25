@@ -5,6 +5,7 @@ export interface MediaParams {
   desc: string;
   image: string;
   video?: string;
+  videoEmbed?: string; // Facebook embed code for videos
 }
 
 export interface ImageUploadResponse {
@@ -27,4 +28,5 @@ export interface Media extends MediaParams {
   _id?: string;
   createdAt?: string;
   updatedAt?: string;
+  created_date?: string;
 }

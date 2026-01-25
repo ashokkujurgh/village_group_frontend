@@ -113,6 +113,7 @@ export default function AdminContent() {
             type: mediaData.type,
             desc: mediaData.desc,
             image: mediaData.image,
+            video: mediaData.video,
         });
         setShowUploadForm(true);
     };

@@ -41,7 +41,7 @@ export default function MediaList({ media, loading, error, onUpload, onEdit, onD
 							className="p-4 border rounded-lg hover:shadow-md transition-shadow"
 						>
 							<div className="flex gap-4">
-								{m.image && (
+								{m.image && m.type !== "video" && (
 									<div className="flex-shrink-0">
 										<img
 											src={`${baseUrl}/images/${m.image}`}
@@ -50,10 +50,28 @@ export default function MediaList({ media, loading, error, onUpload, onEdit, onD
 										/>
 									</div>
 								)}
+								{m.type === "video" && (
+									<div className="flex-shrink-0">
+										
+											<div className="w-20 h-20 bg-black rounded overflow-hidden">
+												<div 
+													dangerouslySetInnerHTML={{ __html: m.video||"" }}
+													className="w-full h-full transform scale-75 origin-top-left"
+													style={{
+														width: "100%",
+														height: "100%",
+														overflow: "hidden",
+														pointerEvents: "none"
+													}}
+												/>
+											</div>
+										
+									</div>
+								)}
 								<div className="flex-1">
 									<h3 className="font-semibold text-gray-800">{m.title}</h3>
 									<p className="text-sm text-gray-500">
-										Type: <span className="font-medium">{m.type}</span>
+										Type: <span className="font-medium">{m.type === "video" ? "Video (Facebook)" : m.type}</span>
 										{m.createdAt && (
 											<>
 												{" "}
@@ -93,6 +111,25 @@ export default function MediaList({ media, loading, error, onUpload, onEdit, onD
 									</button>
 								</div>
 							</div>
+							
+							{m.type === "video" && m.videoEmbed && (
+								<div className="mt-4 pt-4 border-t">
+									<p className="text-xs font-medium text-gray-600 mb-3">Video Preview:</p>
+									<div className="w-full bg-black rounded-lg overflow-hidden" style={{ maxWidth: "100%", aspectRatio: "16/9" }}>
+										<div 
+											dangerouslySetInnerHTML={{ __html: m.videoEmbed }}
+											className="w-full h-full"
+											style={{
+												width: "100%",
+												height: "100%",
+												display: "flex",
+												alignItems: "center",
+												justifyContent: "center"
+											}}
+										/>
+									</div>
+								</div>
+							)}
 						</div>
 					))}
 				</div>

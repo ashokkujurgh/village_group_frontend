@@ -8,7 +8,7 @@ export const useEditMedia = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const editMedia = async (mediaId: string, mediaData: Partial<MediaParams>): Promise<Media | null> => {
+  const editMedia = async (mediaId: string, mediaData: Partial<MediaParams>): Promise<any> => {
     setLoading(true);
     setError(null);
 
@@ -37,12 +37,10 @@ export const useEditMedia = () => {
 
       const data: MediaResponse = await response.json();
 
-      if (!data.success) {
-        throw new Error(data.message || "Media update failed");
-      }
+   
 
       setLoading(false);
-      return data.data || null;
+      return data.message || null;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to update media";
       setError(errorMessage);
