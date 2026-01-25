@@ -7,28 +7,30 @@ import UploadMediaForm from "../component/UploadMediaForm";
 import AddNewsForm from "../component/AddNewsForm";
 import Dialog from "../component/Dialog";
 import UserList from "../component/UserList";
+import MediaList from "../component/MediaList";
 import NewsList from "../component/NewsList";
 import { useFetchUsers } from "../hooks/useFetchUsers";
 import { useFetchNews } from "../hooks/useFetchNews";
+import { useFetchMedias } from "../hooks/useFetchMedias";
 import { useDeleteNews } from "../hooks/useDeleteNews";
-
-const initialMedia = [
-    { id: 1, title: "Event Photo 1", type: "image", uploaded: "2026-01-10" },
-    { id: 2, title: "Promo Video", type: "video", uploaded: "2026-01-12" },
-    { id: 3, title: "Flyer PDF", type: "document", uploaded: "2026-01-15" },
-];
+import { useDeleteMedia } from "../hooks/useDeleteMedia";
+import { useEditMedia } from "../hooks/useEditMedia";
 
 export default function AdminContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { users, loading, fetchUsers, error } = useFetchUsers();
     const { news: newsData, loading: newsLoading, fetchNews, error: newsError } = useFetchNews();
-    const [media, setMedia] = useState(initialMedia);
+    const { media, loading: mediaLoading, fetchMedias, error: mediaError } = useFetchMedias();
+    const { deleteMedia } = useDeleteMedia();
+    const { editMedia } = useEditMedia();
     const [newsItems, setNewsItems] = useState<any[]>([]);
     const [active, setActive] = useState("Users");
     const [showAddForm, setShowAddForm] = useState(false);
     const [showUploadForm, setShowUploadForm] = useState(false);
     const [showNewsForm, setShowNewsForm] = useState(false);
+    const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
+    const [editingMediaData, setEditingMediaData] = useState<any>(null);
     const [editingNewsId, setEditingNewsId] = useState<string | null>(null);
     const [editingNewsData, setEditingNewsData] = useState<any>(null);
 
@@ -83,6 +85,7 @@ export default function AdminContent() {
     useEffect(() => {
         fetchUsers();
         fetchNews();
+        fetchMedias();
     }, []);
 
     useEffect(() => {
@@ -92,14 +95,26 @@ export default function AdminContent() {
     }, [newsData]);
 
     const handleUploadMedia = (mediaData: { title: string; type: "image" | "video"; file: File }) => {
-        const newMedia = {
-            id: media.length + 1,
+        fetchMedias();
+        setShowUploadForm(false);
+    };
+
+    const handleDeleteMedia = async (mediaId: string) => {
+        const success = await deleteMedia(mediaId);
+        if (success) {
+            fetchMedias();
+        }
+    };
+
+    const handleEditMedia = (mediaId: string, mediaData: any) => {
+        setEditingMediaId(mediaId);
+        setEditingMediaData({
             title: mediaData.title,
             type: mediaData.type,
-            uploaded: new Date().toISOString().split("T")[0],
-        };
-        setMedia([...media, newMedia]);
-        setShowUploadForm(false);
+            desc: mediaData.desc,
+            image: mediaData.image,
+        });
+        setShowUploadForm(true);
     };
 
     const handleAddNews = (newsData: { title: string; summary: string }) => {
@@ -163,30 +178,18 @@ export default function AdminContent() {
                 )}
 
                 {active === "Media" && (
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-medium text-gray-800">Media Library</h2>
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => setShowUploadForm(true)} className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Upload</button>
-                                <button className="px-3 py-2 border rounded hover:bg-gray-50">Manage</button>
-                            </div>
-                        </div>
-
-                        <ul className="divide-y">
-                            {media.map((m) => (
-                                <li key={m.id} className="p-3 flex items-center justify-between">
-                                    <div>
-                                        <div className="font-medium">{m.title}</div>
-                                        <div className="text-sm text-gray-500">{m.type} • Uploaded {m.uploaded}</div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button className="text-indigo-600 hover:underline">Edit</button>
-                                        <button className="text-red-600 hover:underline">Delete</button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                    <MediaList
+                        media={media}
+                        loading={mediaLoading}
+                        error={mediaError}
+                        onUpload={() => {
+                            setEditingMediaId(null);
+                            setEditingMediaData(null);
+                            setShowUploadForm(true);
+                        }}
+                        onEdit={handleEditMedia}
+                        onDelete={handleDeleteMedia}
+                    />
                 )}
 
                 {active === "News" && (
@@ -211,8 +214,27 @@ export default function AdminContent() {
             </Dialog>
 
             {/* Upload Media Dialog */}
-            <Dialog isOpen={showUploadForm} onClose={() => setShowUploadForm(false)} title="Upload Media">
-                <UploadMediaForm onUpload={handleUploadMedia} onCancel={() => setShowUploadForm(false)} />
+            <Dialog isOpen={showUploadForm} onClose={() => {
+                setShowUploadForm(false);
+                setEditingMediaId(null);
+                setEditingMediaData(null);
+            }} title={editingMediaId ? "Edit Media" : "Upload Media"}>
+                <UploadMediaForm
+                    mediaId={editingMediaId || undefined}
+                    initialData={editingMediaData || undefined}
+                    isEditing={!!editingMediaId}
+                    onSuccess={() => {
+                        fetchMedias();
+                        setShowUploadForm(false);
+                        setEditingMediaId(null);
+                        setEditingMediaData(null);
+                    }}
+                    onCancel={() => {
+                        setShowUploadForm(false);
+                        setEditingMediaId(null);
+                        setEditingMediaData(null);
+                    }}
+                />
             </Dialog>
 
             {/* Create/Edit News Dialog */}

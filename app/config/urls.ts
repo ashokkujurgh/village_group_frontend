@@ -6,7 +6,11 @@ export const API_ENDPOINTS = {
   LOGIN: "/login",
   NEWS: "/news",
   ADMIN: "/admin",
- ALLADMIN: "/alladmin",
+  ALLADMIN: "/alladmin",
+  IMAGES: "/images",
+  MEDIAS: "/medias",
+  MEDIA:"/media",
+  MEDIAS_ACTIVE: "/medias/active",
 
   // Add more endpoints as needed
 };
