@@ -157,7 +157,7 @@ console.log("med",displayMediaItems)
                       )}
                     </div>
                   </div> :
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
 
                       <div className="bg-black rounded o">
                         <div
